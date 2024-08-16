@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/plugins/theme_switcher">
+    <file>map.png</file>
+  </qresource>
+</RCC>
