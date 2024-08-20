@@ -26,8 +26,9 @@ from qgis.PyQt import QtWidgets, QtGui, QtCore
 
 
 class ThemeButton(QtWidgets.QToolButton):
-    def __init__(self, theme, themeConfig, dialog, parent=None):
+    def __init__(self, themeName, theme, themeConfig, dialog, parent=None):
         super().__init__(parent)
+        self.themeName = themeName
         self.theme = theme
         self.themeConfig = themeConfig
         self.dialog = dialog
@@ -36,7 +37,7 @@ class ThemeButton(QtWidgets.QToolButton):
         self.setIcon(QtGui.QIcon(self.iconPath))
         self.setIconSize(QtCore.QSize(64, 64))
 
-        self.setText(self.theme)
+        self.setText(self.themeName)
         self.setToolButtonStyle(
             QtCore.Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
@@ -49,6 +50,51 @@ class ThemeButton(QtWidgets.QToolButton):
         self.dialog.close()
 
 
+class ThemeSwitcherWidget(QtWidgets.QWidget):
+    def __init__(self, parent, themeConfig):
+        super().__init__(parent)
+
+        self.setLayout(QtWidgets.QHBoxLayout())
+
+        self.themeConfig = themeConfig
+        self.dialog = parent
+        self.populate()
+
+        self.themeConfig.configChanged.connect(self.populate)
+
+    def populate(self):
+        # remove all groups
+        for i in reversed(range(self.layout().count())):
+            self.layout().itemAt(i).widget().setParent(None)
+
+        def createThemeButton(themeName, theme, parent):
+            btn = ThemeButton(themeName, theme,
+                              self.themeConfig, self.dialog)
+            parent.layout().addWidget(btn)
+
+        def createGroupWidget(groupName):
+            groupWidget = QtWidgets.QGroupBox(self)
+            groupWidget.setTitle(groupName)
+            groupWidget.setFlat(True)
+            groupWidget.setLayout(QtWidgets.QHBoxLayout())
+
+            for t in self.themeConfig.themeGroups[groupName]:
+                themeName, theme = t
+                createThemeButton(themeName, theme, groupWidget)
+
+            groupWidget.layout().addStretch()
+            return groupWidget
+
+        for group in sorted([g for g in self.themeConfig.themeGroups if g != 'Other']):
+            self.layout().addWidget(createGroupWidget(group))
+
+        if len(self.themeConfig.themeGroups) > 1 and 'Other' in self.themeConfig.themeGroups:
+            self.layout().addWidget(createGroupWidget('Other'))
+        else:
+            # no groups
+            for theme in self.themeConfig.themes:
+                createThemeButton(theme, theme, self)
+
 class ThemeSwitcherDialog(QtWidgets.QDialog):
     def __init__(self, main):
         """Constructor."""
@@ -60,17 +106,25 @@ class ThemeSwitcherDialog(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon(self.iconPath))
 
         self.setWindowTitle(self.main.tr(u'Theme switcher'))
-        self.setLayout(QtWidgets.QHBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
 
-        self.populate()
-        self.themeConfig.configChanged.connect(self.populate)
+        label = QtWidgets.QLabel('Choose map theme')
+        labelFont = label.font()
+        labelFont.setBold(True)
+        labelFont.setPointSize(12)
+        label.setFont(labelFont)
+        self.layout().addWidget(label)
 
-    def populate(self):
-        # remove all buttons
-        for i in reversed(range(self.layout().count())):
-            self.layout().itemAt(i).widget().setParent(None)
+        self.layout().addWidget(ThemeSwitcherWidget(self, self.themeConfig))
 
-        # add button for each theme
-        for theme in self.themeConfig.themes:
-            btn = ThemeButton(theme, self.themeConfig, self)
-            self.layout().addWidget(btn)
+        self.layout().addStretch()
+
+        buttonBox = QtWidgets.QDialogButtonBox(self)
+        buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        buttonBox.setStandardButtons(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        buttonBox.button(
+            QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.close)
+        buttonBox.button(
+            QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.close)
+        self.layout().addWidget(buttonBox)

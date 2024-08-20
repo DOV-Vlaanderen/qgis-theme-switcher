@@ -23,10 +23,29 @@ class ThemeConfig(QtCore.QObject):
         self.layerTreeRoot = QgsProject.instance().layerTreeRoot()
         self.layerTreeModel = self.main.iface.layerTreeView().layerTreeModel()
         self.mapThemeCollection = QgsProject.instance().mapThemeCollection()
+
         self.themes = sorted(self.mapThemeCollection.mapThemes())
+        self.themeGroups = self._parseGroups()
         self.currentTheme = self._loadCurrentTheme()
 
         self.configChanged.emit()
+
+    def _parseGroups(self):
+        groups = {'Other': []}
+
+        for theme in self.themes:
+            if ':' in theme:
+                groupName = theme[:theme.find(':')].strip()
+                themeName = theme[theme.find(':') + 1:].strip()
+
+                if groupName not in groups:
+                    groups[groupName] = []
+
+                groups[groupName].append((themeName, theme))
+            else:
+                groups['Other'].append((theme, theme))
+
+        return groups
 
     def _loadCurrentTheme(self):
         currentState = self.mapThemeCollection.createThemeFromCurrentState(
