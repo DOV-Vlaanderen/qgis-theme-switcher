@@ -85,15 +85,16 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
             groupWidget.layout().addStretch()
             return groupWidget
 
-        for group in sorted([g for g in self.themeConfig.themeGroups if g != 'Other']):
-            self.layout().addWidget(createGroupWidget(group))
-
-        if len(self.themeConfig.themeGroups) > 1 and 'Other' in self.themeConfig.themeGroups:
-            self.layout().addWidget(createGroupWidget('Other'))
-        else:
-            # no groups
+        if len(self.themeConfig.themeGroups) == 1 and 'Other' in self.themeConfig.themeGroups:
+            # no user defined group, skip the groups altogether
             for theme in self.themeConfig.themes:
                 createThemeButton(theme, theme, self)
+
+        else:
+            # all user defined groups first
+            for group in sorted(self.themeConfig.themeGroups, key=lambda x: x if x != 'Other' else -1):
+                self.layout().addWidget(createGroupWidget(group))
+
 
 class ThemeSwitcherDialog(QtWidgets.QDialog):
     def __init__(self, main):

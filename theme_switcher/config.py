@@ -45,6 +45,9 @@ class ThemeConfig(QtCore.QObject):
             else:
                 groups['Other'].append((theme, theme))
 
+        if len(groups['Other']) == 0:
+            del (groups['Other'])
+
         return groups
 
     def _loadCurrentTheme(self):
