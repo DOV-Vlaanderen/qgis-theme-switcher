@@ -26,10 +26,11 @@ from qgis.PyQt import QtWidgets, QtGui, QtCore
 
 
 class ThemeButton(QtWidgets.QToolButton):
-    def __init__(self, theme, themeConfig, parent=None):
+    def __init__(self, theme, themeConfig, dialog, parent=None):
         super().__init__(parent)
         self.theme = theme
         self.themeConfig = themeConfig
+        self.dialog = dialog
 
         self.iconPath = ':/plugins/theme_switcher/map.png'
         self.setIcon(QtGui.QIcon(self.iconPath))
@@ -44,6 +45,8 @@ class ThemeButton(QtWidgets.QToolButton):
     def switchToTheme(self):
         self.themeConfig.mapThemeCollection.applyTheme(
             self.theme, self.themeConfig.layerTreeRoot, self.themeConfig.layerTreeModel)
+
+        self.dialog.close()
 
 
 class ThemeSwitcherDialog(QtWidgets.QDialog):
@@ -69,6 +72,5 @@ class ThemeSwitcherDialog(QtWidgets.QDialog):
 
         # add button for each theme
         for theme in self.themeConfig.themes:
-            btn = ThemeButton(theme, self.themeConfig)
-            btn.clicked.connect(self.close)
+            btn = ThemeButton(theme, self.themeConfig, self)
             self.layout().addWidget(btn)
