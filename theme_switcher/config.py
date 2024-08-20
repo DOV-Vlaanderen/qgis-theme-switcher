@@ -30,14 +30,21 @@ class ThemeConfig(QtCore.QObject):
 
         self.configChanged.emit()
 
+    def _parseGroupNameThemeName(self, theme):
+        if ':' in theme:
+            groupName = theme[:theme.find(':')].strip()
+            themeName = theme[theme.find(':') + 1:].strip()
+            return groupName, themeName
+        else:
+            return None, themeName
+
     def _parseGroups(self):
         groups = {'Other': []}
 
         for theme in self.themes:
-            if ':' in theme:
-                groupName = theme[:theme.find(':')].strip()
-                themeName = theme[theme.find(':') + 1:].strip()
+            groupName, themeName = self._parseGroupNameThemeName(theme)
 
+            if groupName is not None:
                 if groupName not in groups:
                     groups[groupName] = []
 
