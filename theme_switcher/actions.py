@@ -38,4 +38,4 @@ class ToolbarButton(ThemeSwitchAction, QtWidgets.QToolButton):
         if self.main.themeConfig.currentTheme is not None:
             self.setText(self.main.themeConfig.currentTheme)
         else:
-            self.setText('Choose theme')
+            self.setText(self.main.tr('Choose theme'))

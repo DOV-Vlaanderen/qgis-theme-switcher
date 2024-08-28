@@ -11,6 +11,8 @@ class ThemeConfig(QtCore.QObject):
         super().__init__()
 
         self.main = main
+        self.GROUP_OTHER_NAME = self.main.tr('Other')
+
         self.load()
 
         QgsProject.instance().cleared.connect(self.load)
@@ -43,7 +45,7 @@ class ThemeConfig(QtCore.QObject):
             return None, theme
 
     def _parseGroups(self):
-        groups = {'Other': []}
+        groups = {self.GROUP_OTHER_NAME: []}
 
         for theme in self.themes:
             groupName, themeName = self._parseGroupNameThemeName(theme)
@@ -54,10 +56,10 @@ class ThemeConfig(QtCore.QObject):
 
                 groups[groupName].append((themeName, theme))
             else:
-                groups['Other'].append((theme, theme))
+                groups[self.GROUP_OTHER_NAME].append((theme, theme))
 
-        if len(groups['Other']) == 0:
-            del (groups['Other'])
+        if len(groups[self.GROUP_OTHER_NAME]) == 0:
+            del (groups[self.GROUP_OTHER_NAME])
 
         return groups
 

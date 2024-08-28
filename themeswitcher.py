@@ -94,7 +94,7 @@ class ThemeSwitcher:
         self.first_start = True
 
         self.dialog = ThemeSwitcherDialog(self)
-        self.toolbar = self.iface.addToolBar('Theme switcher')
+        self.toolbar = self.iface.addToolBar(self.tr('Theme switcher'))
         ThemeSwitcherToolbar(self.toolbar, self)
 
     def unload(self):

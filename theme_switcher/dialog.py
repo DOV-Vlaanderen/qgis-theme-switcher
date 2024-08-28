@@ -90,7 +90,7 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
             groupWidget.layout().addStretch()
             return groupWidget
 
-        if len(self.themeConfig.themeGroups) == 1 and 'Other' in self.themeConfig.themeGroups:
+        if len(self.themeConfig.themeGroups) == 1 and self.themeConfig.GROUP_OTHER_NAME in self.themeConfig.themeGroups:
             # no user defined group, skip the groups altogether
             size = math.ceil(math.sqrt(len(self.themeConfig.themes)))
 
@@ -101,9 +101,9 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
         else:
             # all user defined groups first
             groupNames = sorted(
-                [g for g in self.themeConfig.themeGroups.keys() if g != 'Other'])
-            if 'Other' in self.themeConfig.themeGroups.keys():
-                groupNames.append('Other')
+                [g for g in self.themeConfig.themeGroups.keys() if g != self.themeConfig.GROUP_OTHER_NAME])
+            if self.themeConfig.GROUP_OTHER_NAME in self.themeConfig.themeGroups.keys():
+                groupNames.append(self.themeConfig.GROUP_OTHER_NAME)
 
             size = math.ceil(math.sqrt(len(groupNames)))
 
@@ -128,7 +128,7 @@ class ThemeSwitcherDialog(QtWidgets.QDialog):
         self.setWindowTitle(self.main.tr(u'Theme switcher'))
         self.setLayout(QtWidgets.QVBoxLayout())
 
-        label = QtWidgets.QLabel('Choose map theme')
+        label = QtWidgets.QLabel(self.main.tr('Choose map theme'))
         labelFont = label.font()
         labelFont.setBold(True)
         labelFont.setPointSize(12)
