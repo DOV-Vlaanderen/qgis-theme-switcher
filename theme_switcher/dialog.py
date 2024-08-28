@@ -22,6 +22,7 @@
  ***************************************************************************/
 """
 
+import math
 from qgis.PyQt import QtWidgets, QtGui, QtCore
 
 
@@ -54,7 +55,9 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
     def __init__(self, parent, themeConfig):
         super().__init__(parent)
 
-        self.setLayout(QtWidgets.QHBoxLayout())
+        self.setLayout(QtWidgets.QGridLayout())
+        self.layout().setHorizontalSpacing(10)
+        self.layout().setVerticalSpacing(10)
 
         self.themeConfig = themeConfig
         self.dialog = parent
@@ -65,12 +68,13 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
     def populate(self):
         # remove all groups
         for i in reversed(range(self.layout().count())):
-            self.layout().itemAt(i).widget().setParent(None)
+            try:
+                self.layout().itemAt(i).widget().setParent(None)
+            except AttributeError:
+                continue
 
-        def createThemeButton(themeName, theme, parent):
-            btn = ThemeButton(themeName, theme,
-                              self.themeConfig, self.dialog)
-            parent.layout().addWidget(btn)
+        def createThemeButton(themeName, theme):
+            return ThemeButton(themeName, theme, self.themeConfig, self.dialog)
 
         def createGroupWidget(groupName):
             groupWidget = QtWidgets.QGroupBox(self)
@@ -80,20 +84,35 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
 
             for t in self.themeConfig.themeGroups[groupName]:
                 themeName, theme = t
-                createThemeButton(themeName, theme, groupWidget)
+                btn = createThemeButton(themeName, theme)
+                groupWidget.layout().addWidget(btn)
 
             groupWidget.layout().addStretch()
             return groupWidget
 
         if len(self.themeConfig.themeGroups) == 1 and 'Other' in self.themeConfig.themeGroups:
             # no user defined group, skip the groups altogether
-            for theme in self.themeConfig.themes:
-                createThemeButton(theme, theme, self)
+            size = math.ceil(math.sqrt(len(self.themeConfig.themes)))
 
+            for i in range(size):
+                for ix, theme in enumerate(self.themeConfig.themes[(i*size): ((i*size)+size)]):
+                    btn = createThemeButton(theme, theme)
+                    self.layout().addWidget(btn, i, ix, QtCore.Qt.AlignmentFlag.AlignCenter)
         else:
             # all user defined groups first
-            for group in sorted(self.themeConfig.themeGroups, key=lambda x: x if x != 'Other' else -1):
-                self.layout().addWidget(createGroupWidget(group))
+            groupNames = sorted(
+                [g for g in self.themeConfig.themeGroups.keys() if g != 'Other'])
+            if 'Other' in self.themeConfig.themeGroups.keys():
+                groupNames.append('Other')
+
+            size = math.ceil(math.sqrt(len(groupNames)))
+
+            for i in range(size):
+                for ix, group in enumerate(groupNames[(i*size): ((i*size)+size)]):
+                    self.layout().addWidget(createGroupWidget(group), i,
+                                            ix, QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        self.adjustSize()
 
 
 class ThemeSwitcherDialog(QtWidgets.QDialog):
@@ -129,3 +148,5 @@ class ThemeSwitcherDialog(QtWidgets.QDialog):
         buttonBox.button(
             QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.close)
         self.layout().addWidget(buttonBox)
+
+        self.adjustSize()

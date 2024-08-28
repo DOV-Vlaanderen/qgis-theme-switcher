@@ -16,27 +16,31 @@ class ThemeConfig(QtCore.QObject):
         QgsProject.instance().cleared.connect(self.load)
         QgsProject.instance().readProject.connect(self.load)
 
-        self.mapThemeCollection.mapThemesChanged.connect(self.load)
-        self.layerTreeRoot.visibilityChanged.connect(self.load)
-
     def load(self):
         self.layerTreeRoot = QgsProject.instance().layerTreeRoot()
         self.layerTreeModel = self.main.iface.layerTreeView().layerTreeModel()
         self.mapThemeCollection = QgsProject.instance().mapThemeCollection()
 
+        self.mapThemeCollection.mapThemesChanged.connect(self.loadThemes)
+        self.layerTreeRoot.visibilityChanged.connect(self.loadThemes)
+
+        self.loadThemes()
+
+    def loadThemes(self):
         self.themes = sorted(self.mapThemeCollection.mapThemes())
         self.themeGroups = self._parseGroups()
         self.currentTheme = self._loadCurrentTheme()
-
         self.configChanged.emit()
 
     def _parseGroupNameThemeName(self, theme):
-        if ':' in theme:
-            groupName = theme[:theme.find(':')].strip()
-            themeName = theme[theme.find(':') + 1:].strip()
+        groupNameSeparator = ':'
+
+        if groupNameSeparator in theme:
+            groupName = theme[:theme.find(groupNameSeparator)].strip()
+            themeName = theme[theme.find(groupNameSeparator) + 1:].strip()
             return groupName, themeName
         else:
-            return None, themeName
+            return None, theme
 
     def _parseGroups(self):
         groups = {'Other': []}
