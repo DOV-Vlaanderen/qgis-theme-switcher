@@ -5,9 +5,19 @@ from .translate import Translatable
 
 
 class ThemeConfig(QtCore.QObject, Translatable):
+    """Class to centralise all information regarding themes."""
     configChanged = QtCore.pyqtSignal()
 
     def __init__(self, main):
+        """Initialise the theme configuration.
+
+        Load current themes and connect signals to reload when changing project.
+
+        Parameters
+        ----------
+        main : ThemeSwitcher
+            Reference to main plugin instance.
+        """
         super().__init__()
 
         self.main = main
@@ -19,6 +29,7 @@ class ThemeConfig(QtCore.QObject, Translatable):
         QgsProject.instance().readProject.connect(self.load)
 
     def load(self):
+        """Connect project specific signals and load current themes."""
         self.layerTreeRoot = QgsProject.instance().layerTreeRoot()
         self.layerTreeModel = self.main.iface.layerTreeView().layerTreeModel()
         self.mapThemeCollection = QgsProject.instance().mapThemeCollection()
@@ -29,12 +40,28 @@ class ThemeConfig(QtCore.QObject, Translatable):
         self.loadThemes()
 
     def loadThemes(self):
+        """Load themes, theme groups and emit signal that config is updated."""
         self.themes = sorted(self.mapThemeCollection.mapThemes())
         self.themeGroups = self._parseGroups()
         self.currentTheme = self._loadCurrentTheme()
         self.configChanged.emit()
 
     def _parseGroupNameThemeName(self, theme):
+        """Split the QGIS theme name into group name and theme name.
+
+        If the QGIS theme name contains a ':', split the first part into the groupname and the other part
+        into the themename.
+
+        Parameters
+        ----------
+        theme : str
+            QGIS theme name
+
+        Returns
+        -------
+        groupName, themeName
+            Group name (or None when no group found) and theme name
+        """
         groupNameSeparator = ':'
 
         if groupNameSeparator in theme:
@@ -45,6 +72,13 @@ class ThemeConfig(QtCore.QObject, Translatable):
             return None, theme
 
     def _parseGroups(self):
+        """Parse all QGIS themes into theme groups.
+
+        Returns
+        -------
+        dict(str, list((str, str)))
+            Mapping with group names as keys, and a list of tuples with (theme name, QGIS theme name)
+        """
         groups = {self.GROUP_OTHER_NAME: []}
 
         for theme in self.themes:
@@ -64,6 +98,13 @@ class ThemeConfig(QtCore.QObject, Translatable):
         return groups
 
     def _loadCurrentTheme(self):
+        """Find the currently active theme, or None when no theme is active.
+
+        Returns
+        -------
+        str or None
+            QGIS theme name
+        """
         currentState = self.mapThemeCollection.createThemeFromCurrentState(
             self.layerTreeRoot, self.layerTreeModel)
 

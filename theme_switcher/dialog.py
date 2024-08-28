@@ -28,8 +28,23 @@ from qgis.PyQt import QtWidgets, QtGui, QtCore
 from .translate import Translatable
 
 class ThemeButton(QtWidgets.QToolButton):
-    def __init__(self, themeName, theme, themeConfig, dialog, parent=None):
-        super().__init__(parent)
+    def __init__(self, themeName, theme, themeConfig, dialog):
+        """Initialise a ThemeButton.
+
+        This is a button in the dialog to switch to a particular theme.
+
+        Parameters
+        ----------
+        themeName : str
+            Name of the theme.
+        theme : str
+            Name of the QGIS theme.
+        themeConfig : ThemeConfig
+            Reference to the ThemeConfig instance
+        dialog : ThemeSwitcherDialog
+            Reference to the ThemeSwitcherDialog instance
+        """
+        super().__init__()
         self.themeName = themeName
         self.theme = theme
         self.themeConfig = themeConfig
@@ -46,6 +61,10 @@ class ThemeButton(QtWidgets.QToolButton):
         self.clicked.connect(self.switchToTheme)
 
     def switchToTheme(self):
+        """Called when the button is clicked.
+
+        Switch to the theme and close the dialog.
+        """
         self.themeConfig.mapThemeCollection.applyTheme(
             self.theme, self.themeConfig.layerTreeRoot, self.themeConfig.layerTreeModel)
 
@@ -54,6 +73,17 @@ class ThemeButton(QtWidgets.QToolButton):
 
 class ThemeSwitcherWidget(QtWidgets.QWidget):
     def __init__(self, parent, themeConfig):
+        """Widget containing the ThemeButtons to switch themes.
+
+        If there are groups available, the buttons are grouped per theme group.
+
+        Parameters
+        ----------
+        parent : ThemeSwitcherDialog
+            Reference to parent, in this case ThemeSwitcherDialog instance.
+        themeConfig : ThemeConfig
+            Reference to the ThemeConfig instance
+        """
         super().__init__(parent)
 
         self.setLayout(QtWidgets.QGridLayout())
@@ -67,6 +97,7 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
         self.themeConfig.configChanged.connect(self.populate)
 
     def populate(self):
+        """Populate the widget based on the theme configuration."""
         # remove all groups
         for i in reversed(range(self.layout().count())):
             try:
@@ -118,7 +149,13 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
 
 class ThemeSwitcherDialog(QtWidgets.QDialog, Translatable):
     def __init__(self, main):
-        """Constructor."""
+        """Initialise the dialog.
+
+        Parameters
+        ----------
+        main : ThemeSwitcher
+            Reference to main ThemeSwitcher instance
+        """
         QtWidgets.QDialog.__init__(self)
         self.main = main
         self.themeConfig = self.main.themeConfig

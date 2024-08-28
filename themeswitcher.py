@@ -38,12 +38,14 @@ class ThemeSwitcher(Translatable):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
-        """Constructor.
+        """Initialise the plugin.
 
-        :param iface: An interface instance that will be passed to this class
-            which provides the hook by which you can manipulate the QGIS
-            application at run time.
-        :type iface: QgsInterface
+        Setup the translation and create the ThemeConfig instance.
+
+        Parameters
+        ----------
+        iface : QGisInterface
+            Link to the main QGIS interface.
         """
         # Save reference to the QGIS interface
         self.iface = iface
@@ -66,23 +68,18 @@ class ThemeSwitcher(Translatable):
         self.menu = self.tr(u'&Theme Switcher')
 
         self.toolbar = None
-
-        # Check if plugin was started the first time in current QGIS session
-        # Must be set in initGui() to survive plugin reloads
-        self.first_start = None
-
         self.themeConfig = ThemeConfig(self)
 
     def initGui(self):
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
-        # will be set False in run()
-        self.first_start = True
-
+        """Create the dialog and the toolbar."""
         self.dialog = ThemeSwitcherDialog(self)
         self.toolbar = self.iface.addToolBar(self.tr('Theme switcher'))
         ThemeSwitcherToolbar(self.toolbar, self)
 
     def unload(self):
+        """Called when disabling the plugin or exiting QGIS.
+
+        Remove the toolbar and close the dialog.
+        """
         self.toolbar.parentWidget().removeToolBar(self.toolbar)
         self.dialog.close()
