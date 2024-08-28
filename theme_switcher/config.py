@@ -1,17 +1,17 @@
 from qgis.core import QgsProject
-
-
 from qgis.PyQt import QtCore
 
+from .translate import Translatable
 
-class ThemeConfig(QtCore.QObject):
+
+class ThemeConfig(QtCore.QObject, Translatable):
     configChanged = QtCore.pyqtSignal()
 
     def __init__(self, main):
         super().__init__()
 
         self.main = main
-        self.GROUP_OTHER_NAME = self.main.tr('Other')
+        self.GROUP_OTHER_NAME = self.tr('Other')
 
         self.load()
 

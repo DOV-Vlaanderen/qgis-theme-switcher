@@ -30,10 +30,11 @@ from .resources import *
 from .theme_switcher.config import ThemeConfig
 from .theme_switcher.dialog import ThemeSwitcherDialog
 from .theme_switcher.toolbar import ThemeSwitcherToolbar
+from .theme_switcher.translate import Translatable
 import os.path
 
 
-class ThemeSwitcher:
+class ThemeSwitcher(Translatable):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -71,21 +72,6 @@ class ThemeSwitcher:
         self.first_start = None
 
         self.themeConfig = ThemeConfig(self)
-
-    # noinspection PyMethodMayBeStatic
-    def tr(self, message):
-        """Get the translation for a string using Qt translation API.
-
-        We implement this ourselves since we do not inherit QObject.
-
-        :param message: String for translation.
-        :type message: str, QString
-
-        :returns: Translated version of message.
-        :rtype: QString
-        """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('ThemeSwitcher', message)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""

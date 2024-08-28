@@ -25,6 +25,7 @@
 import math
 from qgis.PyQt import QtWidgets, QtGui, QtCore
 
+from .translate import Translatable
 
 class ThemeButton(QtWidgets.QToolButton):
     def __init__(self, themeName, theme, themeConfig, dialog, parent=None):
@@ -115,7 +116,7 @@ class ThemeSwitcherWidget(QtWidgets.QWidget):
         self.adjustSize()
 
 
-class ThemeSwitcherDialog(QtWidgets.QDialog):
+class ThemeSwitcherDialog(QtWidgets.QDialog, Translatable):
     def __init__(self, main):
         """Constructor."""
         QtWidgets.QDialog.__init__(self)
@@ -125,10 +126,10 @@ class ThemeSwitcherDialog(QtWidgets.QDialog):
         self.iconPath = ':/plugins/theme_switcher/map.png'
         self.setWindowIcon(QtGui.QIcon(self.iconPath))
 
-        self.setWindowTitle(self.main.tr(u'Theme switcher'))
+        self.setWindowTitle(self.tr(u'Theme switcher'))
         self.setLayout(QtWidgets.QVBoxLayout())
 
-        label = QtWidgets.QLabel(self.main.tr('Choose map theme'))
+        label = QtWidgets.QLabel(self.tr('Choose map theme'))
         labelFont = label.font()
         labelFont.setBold(True)
         labelFont.setPointSize(12)

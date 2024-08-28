@@ -1,7 +1,9 @@
 from qgis.PyQt import QtWidgets, QtGui, QtCore
 
+from .translate import Translatable
 
-class ThemeSwitchAction:
+
+class ThemeSwitchAction(Translatable):
     def __init__(self, main):
         self.main = main
 
@@ -38,4 +40,10 @@ class ToolbarButton(ThemeSwitchAction, QtWidgets.QToolButton):
         if self.main.themeConfig.currentTheme is not None:
             self.setText(self.main.themeConfig.currentTheme)
         else:
-            self.setText(self.main.tr('Choose theme'))
+            self.setText(self.tr('Choose theme'))
+
+        if not self.isEnabled():
+            self.setToolTip(
+                self.tr('No map themes found in project, add a theme first.'))
+        else:
+            self.setToolTip('')
