@@ -10,8 +10,7 @@ class ThemeSwitchAction(Translatable):
         self.main.themeConfig.configChanged.connect(self.populate)
 
     def run(self):
-        self.main.dialog.show()
-        self.main.dialog.exec_()
+        self.main.dialog.exec()
 
     def populate(self):
         self.setEnabled(
